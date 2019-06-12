@@ -1,5 +1,21 @@
 import Vue from 'vue'
-import Element from 'element-ui'
-import '../element-variables.scss'
+import { 
+    Button,
+    Card,
+    Input,
+    Row,
+    Col,
+    Container,
+    Main,
+    Message
+} from 'element-ui'
 
-Vue.use(Element)
+Vue.use(Button)
+Vue.use(Card)
+Vue.use(Input)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Container)
+Vue.use(Main)
+
+Vue.prototype.$message = Message;

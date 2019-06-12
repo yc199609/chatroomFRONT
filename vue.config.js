@@ -1,16 +1,6 @@
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const productionGzipExtensions = ['js', 'css'];
 const isProduction = process.env.NODE_ENV === 'production';
-// const path = require('path')
-
-// function resolve(dir){
-//     return path.join(__dirname,'./',dir)
-// }
-
-// const externals = {
-//     'vue':'Vue',
-//     ''
-// }
 
 module.exports = {
     lintOnSave: true,
@@ -36,6 +26,11 @@ module.exports = {
             threshold: 10240,
             minRatio: 0.8
           }))
+            config.externals = {
+                "vue":'Vue',
+                "element-ui":"element-ui",
+                "axios":'axios'
+            }
         }
     }
 }
