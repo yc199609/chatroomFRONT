@@ -12,6 +12,7 @@
 
                 <div class="btnBox">
                     <el-button @click="handleLogin">确定</el-button>
+                    <el-button @click="handleRegister" type="text">没有账号?</el-button>
                 </div>
 
             </el-form>
@@ -21,7 +22,8 @@
 </template>
 <script>
 import Vue from 'vue'
-import { login } from '@/api/login'
+import { login } from '@/api/user'
+import { setToken } from '@/utils/auth'
 import {
     Form,
     FormItem
@@ -39,16 +41,14 @@ export default {
     },
     methods:{
         handleLogin(){
-            this.axios.post('/api/item/addItem',{
-                title:'sdsa'
-            })
-            .then(res=>{
-                console.log(res)
-            })
-            // login(this.form)
-            //     .then(res=>{
-            //         console.log(res)
-            //     })
+            login(this.form)
+                .then(res=>{
+                    setToken(res.data.userName)
+                    this.$router.push({ path: '/' })
+                })
+        },
+        handleRegister(){
+            this.$router.push({ path: '/register' })
         }
     }
 }

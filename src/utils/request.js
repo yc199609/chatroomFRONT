@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Message, MessageBox } from 'element-ui'
 const service = axios.create({
+    baseURL:'/api',
     withCredentials: true, // 跨域带cookie
     timeout: 5000, // 请求超时时间
     headers: {

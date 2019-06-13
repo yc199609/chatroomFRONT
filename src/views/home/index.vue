@@ -1,8 +1,6 @@
 <template>
   <el-container>
     <el-main>
-      <!-- <el-row :gutter="20">
-        <el-col :span="12"> -->
           <el-card class="card">
             <div class="searchBox">
               <el-input
@@ -35,13 +33,6 @@
               <el-button type="text" @click="deleteItem(item)">点击删除</el-button>
             </el-card>
           </el-card>
-        <!-- </el-col>
-        <el-col :span="12">
-          <el-card class="card">
-
-          </el-card>
-        </el-col>
-      </el-row> -->
     </el-main>
   </el-container>
 </template>

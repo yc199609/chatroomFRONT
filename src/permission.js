@@ -2,7 +2,7 @@ import router from './router'
 import NProgress from 'nprogress'
 import { getToken } from '@/utils/auth'
 
-const whiteList = ['/login']
+const whiteList = ['/login','/register']
 router.beforeEach((to, from, next)=>{
     NProgress.start()
     if(getToken()){
