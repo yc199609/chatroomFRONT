@@ -10,7 +10,8 @@ module.exports = {
         https: false, // https:{type:Boolean}
         proxy: {
             '/api': {
-                target: 'http://39.106.80.90:3000/',
+                // target: 'http://39.106.80.90:3000/',
+                target: 'http://localhost:3000/',
                 changeOrigin: true,
                 pathRewrite:{
                     '^/api':''
