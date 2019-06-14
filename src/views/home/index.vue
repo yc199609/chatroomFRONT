@@ -1,124 +1,126 @@
 <template>
   <el-container>
     <el-main>
-          <el-card class="card">
-            <div class="searchBox">
-              <el-input
-                  class="searchInput"
-                  type="text"
-                  placeholder="请输入内容"
-                  v-model="text"
-                  maxlength="90"
-                />
-                <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
+        <el-card class="card">
+          <div style="text-align:right;height:40px;">{{ userName }}</div>
+          <div class="searchBox">
+            <el-input
+                class="searchInput"
+                type="text"
+                placeholder="请输入内容"
+                v-model="text"
+                maxlength="90"
+              />
+              <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
+          </div>
+          <el-card
+            :body-style="{
+              'width': '100%',
+              'display': 'flex',
+              'flex-direction': 'row',
+              'justify-content': 'space-between',
+              'margin-bottom': '10px'
+            }"
+            class="listcard"
+            v-for="(item,index) in list"
+            :key="index">
+            <div class="cardContent">
+                <span style="margin-right:20px;">{{ item.user.userName+':' }}</span>
+                <div v-if="item.mode==='edit'" >
+                  <el-input  v-model="item.title" />
+                  <el-button @click="update(item)">修改</el-button>
+                </div>
+                <div v-else>
+                  <span @click="edit(item)">{{ item.title }}</span>
+                </div>
             </div>
-            <el-card
-              :body-style="{
-                'width': '100%',
-                'display': 'flex',
-                'flex-direction': 'row',
-                'justify-content': 'space-between',
-                'margin-bottom': '10px'
-              }"
-              class="listcard"
-              v-for="(item,index) in list"
-              :key="index">
-              <div v-if="item.mode==='edit'" class="cardContent">
-                <el-input  v-model="item.title" />
-                <el-button @click="update(item)">修改</el-button>
-              </div>
-              <div v-else class="cardContent">
-                <span @click="edit(item)">{{ item.title }}</span>
-              </div>
-              <el-button type="text" @click="deleteItem(item)">点击删除</el-button>
-            </el-card>
+            <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button>
           </el-card>
+        </el-card>
     </el-main>
   </el-container>
 </template>
 
 <script>
+import { getList, addItem, deteleById, updateById } from '@/api/item'
+import { getUserId, getToken } from '@/utils/auth'
 export default {
   name: 'app',
   data(){
     return{
+      userId:'',
+      userName:'',
       text:'',
       list:[
         {
           title:'',
-          mode:''
+          mode:'',
+          user:''
         }
-      ],
-      console:console
+      ]
     }
+  },
+  created(){
+    this.userId = getUserId()
+    this.userName = getToken()
   },
   mounted(){
     this.init()
   },
   methods:{
-    init(){
-      this.axios.get('/api/item/getList')
-      .then(res=>{
-        this.$set(this,'list',res.data.data)
-      })
-    },
-    addItem(){
-      this.axios.post('/api/item/addItem',{
-        title:this.text
-      })
-        .then(res =>{
-          const  result = res.data
-          if(result.code === 0){
-            this.$message({
-              type:"success",
-              message:'成功',
-              duration:500,
-              onClose:()=>{
-                this.text = ''
-                this.init()
-              }
-            })
-          }
+    init(userid){
+      getList(userid)
+        .then(res=>{
+          this.$set(this,'list',res.data)
         })
     },
+    addItem(){
+      addItem({
+        title:this.text,
+        userId:this.userId
+      }).then(res=>{
+        this.message(res,()=>{
+          this.text = ''
+          this.init()
+        })
+      })
+    },
     deleteItem(item){
-      this.axios.post('/api/item/deteleItem',{ id: item._id})
+      deteleById(item._id)
         .then(res=>{
-          const result = res.data
-          if(result.code === 0){
-            this.$message({
-              type:"success",
-              message:'成功',
-              duration:500,
-              onClose:()=>{
-                this.init()
-              }
-            })
-          }
+          this.message(res,()=>{
+            this.init()
+          })
         })
     },
     update(item){
-      this.axios.post('/api/item/updateItem',{
+      updateById({
         title:item.title,
         id:item._id
       })
       .then(res=>{
-        const  result = res.data
-          if(result.code === 0){
-            this.$message({
-              type:"success",
-              message:'成功',
-              duration:500,
-              onClose:()=>{
-                this.$set(item,'mode','show')
-                this.init()
-              }
-            })
-          }
+        this.message(res,()=>{
+          this.$set(item,'mode','show')
+          this.init()
+        })
       })
     },
     edit(item){
-      this.$set(item,'mode','edit')
+      if(item.user._id === this.userId){
+        this.$set(item,'mode','edit')
+      }
+    },
+    message(res,callback){
+        if(res.code === 0){
+          this.$message({
+            type:"success",
+            message:'成功',
+            duration:500,
+            onClose:()=>{
+              callback()
+            }
+          })
+        }
     }
   }
 }

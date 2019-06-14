@@ -23,7 +23,7 @@
 <script>
 import Vue from 'vue'
 import { login } from '@/api/user'
-import { setToken } from '@/utils/auth'
+import { setToken, setUserId } from '@/utils/auth'
 import {
     Form,
     FormItem
@@ -43,6 +43,7 @@ export default {
         handleLogin(){
             login(this.form)
                 .then(res=>{
+                    setUserId(res.data._id)
                     setToken(res.data.userName)
                     this.$router.push({ path: '/' })
                 })

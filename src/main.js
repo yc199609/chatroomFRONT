@@ -5,6 +5,7 @@ import './plugins/element.js'
 import router from './router'
 import './permission'
 
+console.log(process.env.VUE_APP_BASE_API)
 Vue.config.productionTip = false
 
 new Vue({

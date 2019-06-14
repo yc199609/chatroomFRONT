@@ -29,8 +29,9 @@ module.exports = {
           }))
             config.externals = {
                 "vue":'Vue',
-                "element-ui":"element-ui",
-                "axios":'axios'
+                "element-ui":"ELEMENT",
+                "axios":'axios',
+                'nprogress':'NProgress'
             }
         }
     }
