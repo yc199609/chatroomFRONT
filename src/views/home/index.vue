@@ -34,7 +34,7 @@
                   <span @click="edit(item)">{{ item.title }}</span>
                 </div>
             </div>
-            <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button>
+            <!-- <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button> -->
           </el-card>
         </el-card>
     </el-main>
@@ -72,7 +72,8 @@ export default {
   },
   methods:{
     initWebSocket(){
-      const wsurl = "ws://localhost:3000/ws"
+      const wsurl = "ws://39.106.80.90:3000/ws"
+      // const wsurl = "ws://localhost:3000/ws"
       this.websock = new WebSocket(wsurl)
       this.websock.onopen = this.websocketonopen
       this.websock.onmessage = this.websocketonmessage
