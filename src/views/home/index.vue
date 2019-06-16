@@ -34,7 +34,7 @@
                   <span @click="edit(item)">{{ item.title }}</span>
                 </div>
             </div>
-            <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button>
+            <!-- <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button> -->
           </el-card>
         </el-card>
     </el-main>
@@ -42,12 +42,13 @@
 </template>
 
 <script>
-import { getList, addItem, deteleById, updateById } from '@/api/item'
+import { deteleById, updateById } from '@/api/item'
 import { getUserId, getToken } from '@/utils/auth'
 export default {
   name: 'app',
   data(){
     return{
+      websock:'',
       userId:'',
       userName:'',
       text:'',
@@ -55,7 +56,9 @@ export default {
         {
           title:'',
           mode:'',
-          user:''
+          user:{
+            userName:''
+          }
         }
       ]
     }
@@ -65,25 +68,40 @@ export default {
     this.userName = getToken()
   },
   mounted(){
-    this.init()
+    this.initWebSocket()
   },
   methods:{
-    init(userid){
-      getList(userid)
-        .then(res=>{
-          this.$set(this,'list',res.data)
-        })
+    initWebSocket(){
+      const wsurl = "ws://39.106.80.90:3000/ws"
+      // const wsurl = "ws://localhost:3000/ws"
+      this.websock = new WebSocket(wsurl)
+      this.websock.onopen = this.websocketonopen
+      this.websock.onmessage = this.websocketonmessage
+      this.websock.onerror = this.websocketonerror
+      this.websock.onclose = this.websocketonclose
+    },
+    websocketonopen(){
+      // eslint-disable-next-line no-console
+      console.log('连接开始');
+    },
+    websocketonmessage(e){
+      const res = (JSON.parse(e.data))
+      this.$set(this,'list',res.data)
+      this.text = ''
+    },
+    websocketonerror(){
+      alert('连接失败')
+      this.initWebSocket()
+    },
+    websocketonclose(e){
+      // eslint-disable-next-line no-console
+      console.log(e)
     },
     addItem(){
-      addItem({
+      this.websock.send(JSON.stringify({
         title:this.text,
         userId:this.userId
-      }).then(res=>{
-        this.message(res,()=>{
-          this.text = ''
-          this.init()
-        })
-      })
+      }))
     },
     deleteItem(item){
       deteleById(item._id)
@@ -122,6 +140,9 @@ export default {
           })
         }
     }
+  },
+  destroyed(){
+    this.websock.close()
   }
 }
 </script>
