@@ -9,6 +9,7 @@
     "start": "vue-cli-service serve"
   },
   "dependencies": {
+    "ali-oss": "^6.1.1",
     "core-js": "^2.6.5",
     "element-ui": "^2.4.5",
     "js-cookie": "^2.2.0",

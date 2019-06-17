@@ -2,6 +2,7 @@
   <el-container>
     <el-main>
       <el-card class="card">
+        <button v-if="err" @click="initWebSocket">重新连接</button>
         <div style="text-align:right;height:40px;">{{ userName }}</div>
         <div class="searchBox">
           <el-input
@@ -49,6 +50,7 @@ export default {
   name: 'App',
   data() {
     return {
+      err: false,
       websock: '',
       userId: '',
       userName: '',
@@ -86,6 +88,7 @@ export default {
     },
     websocketonopen() {
       console.log('连接开始')
+      this.err = false
     },
     websocketonmessage(e) {
       const res = (JSON.parse(e.data))
@@ -94,7 +97,8 @@ export default {
     },
     websocketonerror() {
       alert('连接失败')
-      this.initWebSocket()
+      this.err = true
+      // this.initWebSocket()
     },
     websocketonclose(e) {
       console.log(e)
