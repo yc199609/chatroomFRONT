@@ -1,42 +1,43 @@
 <template>
   <el-container>
     <el-main>
-        <el-card class="card">
-          <div style="text-align:right;height:40px;">{{ userName }}</div>
-          <div class="searchBox">
-            <el-input
-                class="searchInput"
-                type="text"
-                placeholder="请输入内容"
-                v-model="text"
-                maxlength="90"
-              />
-              <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
-          </div>
-          <el-card
-            :body-style="{
-              'width': '100%',
-              'display': 'flex',
-              'flex-direction': 'row',
-              'justify-content': 'space-between',
-              'margin-bottom': '10px'
-            }"
-            class="listcard"
-            v-for="(item,index) in list"
-            :key="index">
-            <div class="cardContent">
-                <span style="margin-right:20px;">{{ item.user.userName+':' }}</span>
-                <div v-if="item.mode==='edit'" >
-                  <el-input  v-model="item.title" />
-                  <el-button @click="update(item)">修改</el-button>
-                </div>
-                <div v-else>
-                  <span @click="edit(item)">{{ item.title }}</span>
-                </div>
+      <el-card class="card">
+        <div style="text-align:right;height:40px;">{{ userName }}</div>
+        <div class="searchBox">
+          <el-input
+            v-model="text"
+            class="searchInput"
+            type="text"
+            placeholder="请输入内容"
+            maxlength="90"
+          />
+          <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
+        </div>
+        <el-card
+          v-for="(item,index) in list"
+          :key="index"
+          :body-style="{
+            'width': '100%',
+            'display': 'flex',
+            'flex-direction': 'row',
+            'justify-content': 'space-between',
+            'margin-bottom': '10px'
+          }"
+          class="listcard"
+        >
+          <div class="cardContent">
+            <span style="margin-right:20px;">{{ item.user.userName+':' }}</span>
+            <div v-if="item.mode==='edit'">
+              <el-input v-model="item.title" />
+              <el-button @click="update(item)">修改</el-button>
             </div>
-            <!-- <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button> -->
-          </el-card>
+            <div v-else>
+              <span @click="edit(item)">{{ item.title }}</span>
+            </div>
+          </div>
+          <!-- <el-button v-if="item.user._id===userId" type="text" @click="deleteItem(item)">点击删除</el-button> -->
         </el-card>
+      </el-card>
     </el-main>
   </el-container>
 </template>
@@ -45,104 +46,102 @@
 import { deteleById, updateById } from '@/api/item'
 import { getUserId, getToken } from '@/utils/auth'
 export default {
-  name: 'app',
-  data(){
-    return{
-      websock:'',
-      userId:'',
-      userName:'',
-      text:'',
-      list:[
+  name: 'App',
+  data() {
+    return {
+      websock: '',
+      userId: '',
+      userName: '',
+      text: '',
+      list: [
         {
-          title:'',
-          mode:'',
-          user:{
-            userName:''
+          title: '',
+          mode: '',
+          user: {
+            userName: ''
           }
         }
       ]
     }
   },
-  created(){
+  created() {
     this.userId = getUserId()
     this.userName = getToken()
   },
-  mounted(){
+  mounted() {
     this.initWebSocket()
   },
-  methods:{
-    initWebSocket(){
-      const wsurl = "ws://39.106.80.90:3000/ws"
-      // const wsurl = "ws://localhost:3000/ws"
+  destroyed() {
+    this.websock.close()
+  },
+  methods: {
+    initWebSocket() {
+      // const wsurl = 'ws://39.106.80.90:3000/ws'
+      const wsurl = 'ws://localhost:3000/ws'
       this.websock = new WebSocket(wsurl)
       this.websock.onopen = this.websocketonopen
       this.websock.onmessage = this.websocketonmessage
       this.websock.onerror = this.websocketonerror
       this.websock.onclose = this.websocketonclose
     },
-    websocketonopen(){
-      // eslint-disable-next-line no-console
-      console.log('连接开始');
+    websocketonopen() {
+      console.log('连接开始')
     },
-    websocketonmessage(e){
+    websocketonmessage(e) {
       const res = (JSON.parse(e.data))
-      this.$set(this,'list',res.data)
+      this.$set(this, 'list', res.data)
       this.text = ''
     },
-    websocketonerror(){
+    websocketonerror() {
       alert('连接失败')
       this.initWebSocket()
     },
-    websocketonclose(e){
-      // eslint-disable-next-line no-console
+    websocketonclose(e) {
       console.log(e)
     },
-    addItem(){
+    addItem() {
       this.websock.send(JSON.stringify({
-        title:this.text,
-        userId:this.userId
+        title: this.text,
+        userId: this.userId
       }))
     },
-    deleteItem(item){
+    deleteItem(item) {
       deteleById(item._id)
-        .then(res=>{
-          this.message(res,()=>{
+        .then(res => {
+          this.message(res, () => {
             this.init()
           })
         })
     },
-    update(item){
+    update(item) {
       updateById({
-        title:item.title,
-        id:item._id
+        title: item.title,
+        id: item._id
       })
-      .then(res=>{
-        this.message(res,()=>{
-          this.$set(item,'mode','show')
-          this.init()
+        .then(res => {
+          this.message(res, () => {
+            this.$set(item, 'mode', 'show')
+            this.init()
+          })
         })
-      })
     },
-    edit(item){
-      if(item.user._id === this.userId){
-        this.$set(item,'mode','edit')
+    edit(item) {
+      if (item.user._id === this.userId) {
+        this.$set(item, 'mode', 'edit')
       }
     },
-    message(res,callback){
-        if(res.code === 0){
-          this.$message({
-            type:"success",
-            message:'成功',
-            duration:500,
-            onClose:()=>{
-              callback()
-            }
-          })
-        }
+    message(res, callback) {
+      if (res.code === 0) {
+        this.$message({
+          type: 'success',
+          message: '成功',
+          duration: 500,
+          onClose: () => {
+            callback()
+          }
+        })
+      }
     }
-  },
-  destroyed(){
-    this.websock.close()
   }
 }
 </script>
