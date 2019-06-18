@@ -1,15 +1,22 @@
 <template>
   <div>
-    <el-upload
-      :show-file-list="false"
-      :http-request="upload"
-      class="avatar-uploader"
-      action="https://esonxie.oss-cn-hangzhou.aliyuncs.com"
-    >
-      <img v-if="imageUrl" :src="imageUrl" class="avatar">
-      <i v-else class="el-icon-plus avatar-uploader-icon" />
-    </el-upload>
-    <el-button @click="getImgSrc">sads</el-button>
+    <el-card style="width:60vw;margin:0 auto;">
+      <!-- <el-form> -->
+      <el-upload
+        style="display:inline-block;"
+        :show-file-list="false"
+        :http-request="upload"
+        class="avatar-uploader"
+        action="https://esonxie.oss-cn-hangzhou.aliyuncs.com"
+      >
+        <img v-if="imageUrl" :src="imageUrl" class="avatar" style="width:64px;height:64px;">
+        <i v-else class="el-icon-plus avatar-uploader-icon" />
+      </el-upload>
+      {{ form.userName }}
+      <!-- </el-form> -->
+    </el-card>
+
+    <!-- <el-button @click="getImgSrc">sads</el-button> -->
   </div>
 
 </template>
@@ -24,6 +31,9 @@ Vue.use(Upload)
 export default {
   data() {
     return {
+      form: {
+        userName: ''
+      },
       imageUrl: '',
       client: new OSS({
         region: 'oss-cn-hangzhou',
@@ -33,12 +43,16 @@ export default {
       })
     }
   },
+  mounted() {
+    this.form.userName = getToken()
+    this.getImgSrc()
+  },
   methods: {
     upload(option) {
       const _this = this
       const file = option.file
       var suffix = file.name.substring(file.name.lastIndexOf('.'), file.name.length)
-      const storeAs = 'static/user/' + getToken() + '/' + new Date().getTime() + suffix
+      const storeAs = 'static/user/' + this.form.userName + '/' + new Date().getTime() + suffix
       this.client
         .multipartUpload(storeAs, file, {})
         .then(res => {
@@ -47,7 +61,7 @@ export default {
             message: '上传成功',
             duration: 500
           })
-          this.imageUrl = res.url
+          this.imageUrl = this.client.signatureUrl(res.name)
           option.onSuccess(res)
         })
         .catch(err => {
@@ -56,15 +70,14 @@ export default {
     },
     async getImgSrc() {
       const res = await this.client.list({
-        prefix: 'static/user/' + getToken() + '/',
+        prefix: 'static/user/' + this.form.userName + '/',
         delimiter: '/'
       })
       if (res.objects) {
-        const signUrl = this.client.signatureUrl(res.objects[res.objects.length - 1])
-        console.log(signUrl)
+        this.imageUrl = this.client.signatureUrl(res.objects[res.objects.length - 1].name)
+        console.log(this.imageUrl)
       }
     }
-
   }
 }
 </script>

@@ -15,7 +15,7 @@
           <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
         </div>
         <el-card
-          v-for="(item,index) in list"
+          v-for="(item,index) in itemList"
           :key="index"
           :body-style="{
             'width': '100%',
@@ -27,6 +27,7 @@
           class="listcard"
         >
           <div class="cardContent">
+            <img :src="item.imgSrc" alt="" style="width:64px;height:64px;">
             <span style="margin-right:20px;">{{ item.user.userName+':' }}</span>
             <div v-if="item.mode==='edit'">
               <el-input v-model="item.title" />
@@ -46,10 +47,17 @@
 <script>
 import { deteleById, updateById } from '@/api/item'
 import { getUserId, getToken } from '@/utils/auth'
+import OSS from 'ali-oss'
 export default {
   name: 'App',
   data() {
     return {
+      client: new OSS({
+        region: 'oss-cn-hangzhou',
+        accessKeyId: 'LTAIJUrYwKlR1I2z',
+        accessKeySecret: 'PwEXbtoOVJpZNLoi409Oayul3IMiZ9',
+        bucket: 'yuanc'
+      }),
       err: false,
       websock: '',
       userId: '',
@@ -63,7 +71,40 @@ export default {
             userName: ''
           }
         }
+      ],
+      itemList: [
+        {
+          title: '',
+          mode: '',
+          user: {
+            userName: ''
+          },
+          imgSrc: ''
+        }
       ]
+    }
+  },
+  watch: {
+    list: async function(val) {
+      this.itemList = await Promise.all(val.map(async item => {
+        return await new Promise((resolve, reject) => {
+          try {
+            this.client.list({
+              prefix: 'static/user/' + item.user.userName + '/',
+              delimiter: '/'
+            }).then(res => {
+              if (res.objects) {
+                const imgSrc = this.client.signatureUrl(res.objects[res.objects.length - 1].name)
+                resolve({ ...item, imgSrc })
+              } else {
+                resolve({ ...item })
+              }
+            })
+          } catch (error) {
+            reject(error)
+          }
+        })
+      }))
     }
   },
   created() {
@@ -87,12 +128,12 @@ export default {
       this.websock.onclose = this.websocketonclose
     },
     websocketonopen() {
-      console.log('连接开始')
+      // console.log('连接开始')
       this.err = false
     },
     websocketonmessage(e) {
-      const res = (JSON.parse(e.data))
-      this.$set(this, 'list', res.data)
+      const data = (JSON.parse(e.data).data)
+      this.$set(this, 'list', data)
       this.text = ''
     },
     websocketonerror() {
