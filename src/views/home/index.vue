@@ -3,7 +3,7 @@
     <el-main>
       <el-card class="card">
         <button v-if="err" @click="initWebSocket">重新连接</button>
-        <div style="text-align:right;height:40px;">{{ userName }}</div>
+        <div style="text-align:right;height:40px;" @click="hiddleUser">{{ userName }}</div>
         <div class="searchBox">
           <el-input
             v-model="text"
@@ -115,26 +115,34 @@ export default {
     this.initWebSocket()
   },
   destroyed() {
+    console.log(2342)
     this.websock.close()
   },
   methods: {
+    hiddleUser() {
+      this.$router.push({ path: '/user' })
+    },
     initWebSocket() {
       // const wsurl = 'ws://39.106.80.90:3000/ws'
       const wsurl = 'ws://localhost:3000/ws'
-      this.websock = new WebSocket(wsurl)
+      if (!this.websock) {
+        this.websock = new WebSocket(wsurl)
+      }
       this.websock.onopen = this.websocketonopen
       this.websock.onmessage = this.websocketonmessage
       this.websock.onerror = this.websocketonerror
       this.websock.onclose = this.websocketonclose
     },
     websocketonopen() {
-      // console.log('连接开始')
+      console.log('连接开始')
+      // console.log(this.websock)
       this.err = false
     },
     websocketonmessage(e) {
-      const data = (JSON.parse(e.data).data)
-      this.$set(this, 'list', data)
-      this.text = ''
+      // const data = (JSON.parse(e.data).data)
+      console.log(JSON.parse(e.data))
+      // this.$set(this, 'list', data)
+      // this.text = ''
     },
     websocketonerror() {
       alert('连接失败')
@@ -145,6 +153,7 @@ export default {
       console.log(e)
     },
     addItem() {
+      console.log(this.websock)
       this.websock.send(JSON.stringify({
         title: this.text,
         userId: this.userId
