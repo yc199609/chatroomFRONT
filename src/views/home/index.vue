@@ -139,10 +139,10 @@ export default {
       this.err = false
     },
     websocketonmessage(e) {
-      // const data = (JSON.parse(e.data).data)
+      const data = (JSON.parse(e.data).data)
       console.log(JSON.parse(e.data))
-      // this.$set(this, 'list', data)
-      // this.text = ''
+      this.$set(this, 'list', data)
+      this.text = ''
     },
     websocketonerror() {
       alert('连接失败')
