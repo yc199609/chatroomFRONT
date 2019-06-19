@@ -15,7 +15,7 @@
           <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
         </div>
         <el-card
-          v-for="(item,index) in itemList"
+          v-for="(item,index) in list"
           :key="index"
           :body-style="{
             'width': '100%',
@@ -27,7 +27,7 @@
           class="listcard"
         >
           <div class="cardContent">
-            <img :src="item.imgSrc" alt="" style="width:64px;height:64px;">
+            <img :src="imgSrc[item.user._id]" alt="" style="width:64px;height:64px;">
             <span style="margin-right:20px;">{{ item.user.userName+':' }}</span>
             <div v-if="item.mode==='edit'">
               <el-input v-model="item.title" />
@@ -81,30 +81,38 @@ export default {
           },
           imgSrc: ''
         }
-      ]
+      ],
+      imgSrc: {
+
+      }
     }
   },
   watch: {
     list: async function(val) {
-      this.itemList = await Promise.all(val.map(async item => {
-        return await new Promise((resolve, reject) => {
-          try {
-            this.client.list({
-              prefix: 'static/user/' + item.user.userName + '/',
-              delimiter: '/'
-            }).then(res => {
-              if (res.objects) {
-                const imgSrc = this.client.signatureUrl(res.objects[res.objects.length - 1].name)
-                resolve({ ...item, imgSrc })
-              } else {
-                resolve({ ...item })
-              }
-            })
-          } catch (error) {
-            reject(error)
+      const obj = {}
+      // 去除用户id一样的
+      const arr = val.reduce((cur, next) => {
+        obj[next.user._id] ? '' : obj[next.user._id] = true && cur.push(next)
+        return cur
+      }, [])
+      const dataObj = {}
+      await Promise.all(arr.map(async item => {
+        return await new Promise(async(resolve, reject) => {
+          const res = await this.client.list({
+            prefix: 'static/user/' + item.user.userName + '/',
+            delimiter: '/'
+          })
+          if (res.objects) {
+            const imgSrc = this.client.signatureUrl(res.objects[res.objects.length - 1].name)
+            dataObj[item.user._id] = imgSrc
+            resolve()
+          } else {
+            dataObj[item.user._id] = ''
+            resolve()
           }
         })
       }))
+      this.$set(this, 'imgSrc', dataObj)
     }
   },
   created() {
@@ -115,7 +123,6 @@ export default {
     this.initWebSocket()
   },
   destroyed() {
-    console.log(2342)
     this.websock.close()
   },
   methods: {
@@ -134,26 +141,23 @@ export default {
       this.websock.onclose = this.websocketonclose
     },
     websocketonopen() {
-      console.log('连接开始')
-      // console.log(this.websock)
+      // console.log('连接开始')
       this.err = false
     },
     websocketonmessage(e) {
       const data = (JSON.parse(e.data).data)
-      console.log(JSON.parse(e.data))
       this.$set(this, 'list', data)
+      // console.log(this.list)
       this.text = ''
     },
     websocketonerror() {
       alert('连接失败')
       this.err = true
-      // this.initWebSocket()
     },
     websocketonclose(e) {
       console.log(e)
     },
     addItem() {
-      console.log(this.websock)
       this.websock.send(JSON.stringify({
         title: this.text,
         userId: this.userId
