@@ -11,6 +11,7 @@
             type="text"
             placeholder="请输入内容"
             maxlength="90"
+            @keyup.enter.native="addItem"
           />
           <el-button class="searchBtn" type="primary" plain @click="addItem">确认</el-button>
         </div>
@@ -27,7 +28,7 @@
           class="listcard"
         >
           <div class="cardContent">
-            <img :src="imgSrc[item.user._id]" alt="" style="width:64px;height:64px;">
+            <img :src="item.user._id?imgSrc[item.user._id]:''" alt="" style="width:64px;height:64px;">
             <span style="margin-right:20px;">{{ item.user.userName+':' }}</span>
             <div v-if="item.mode==='edit'">
               <el-input v-model="item.title" />
@@ -68,18 +69,9 @@ export default {
           title: '',
           mode: '',
           user: {
-            userName: ''
+            userName: '',
+            _id: ''
           }
-        }
-      ],
-      itemList: [
-        {
-          title: '',
-          mode: '',
-          user: {
-            userName: ''
-          },
-          imgSrc: ''
         }
       ],
       imgSrc: {
@@ -130,8 +122,9 @@ export default {
       this.$router.push({ path: '/user' })
     },
     initWebSocket() {
-      // const wsurl = 'ws://39.106.80.90:3000/ws'
-      const wsurl = 'ws://localhost:3000/ws'
+      const wsurl = 'ws://39.106.80.90:3000/ws'
+      // const wsurl = 'ws://localhost:3000/ws'
+      // const wsurl = 'ws://192.168.0.52:3000'
       if (!this.websock) {
         this.websock = new WebSocket(wsurl)
       }
@@ -147,8 +140,6 @@ export default {
     websocketonmessage(e) {
       const data = (JSON.parse(e.data).data)
       this.$set(this, 'list', data)
-      // console.log(this.list)
-      this.text = ''
     },
     websocketonerror() {
       alert('连接失败')
@@ -162,6 +153,7 @@ export default {
         title: this.text,
         userId: this.userId
       }))
+      this.text = ''
     },
     deleteItem(item) {
       deteleById(item._id)
