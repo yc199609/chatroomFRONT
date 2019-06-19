@@ -31,7 +31,8 @@ module.exports = {
         'vue': 'Vue',
         'element-ui': 'ELEMENT',
         'axios': 'axios',
-        'nprogress': 'NProgress'
+        'nprogress': 'NProgress',
+        'vue-router': 'VueRouter'
       }
     }
   }
