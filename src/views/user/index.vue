@@ -14,6 +14,9 @@
       </el-upload>
       {{ form.userName }}
       <!-- </el-form> -->
+      <div>
+        <el-button @click="handlegoBack">返回</el-button>
+      </div>
     </el-card>
 
     <!-- <el-button @click="getImgSrc">sads</el-button> -->
@@ -77,6 +80,11 @@ export default {
         this.imageUrl = this.client.signatureUrl(res.objects[res.objects.length - 1].name)
         console.log(this.imageUrl)
       }
+    },
+    handlegoBack() {
+      this.$router.push({
+        path: '/'
+      })
     }
   }
 }
