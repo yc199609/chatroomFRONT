@@ -1,3 +1,8 @@
+基本功能已经实现 
+预览地址 ： http://todo.binfeifei.com （需要自己注册用户）
+后续功能看我心情再写
+
+
 # frontend
 
 ## Project setup
@@ -24,6 +29,3 @@ yarn run test
 ```
 yarn run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
