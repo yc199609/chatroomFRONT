@@ -1,7 +1,6 @@
 <template>
   <div>
     <el-card style="width:60vw;margin:0 auto;">
-      <!-- <el-form> -->
       <el-upload
         style="display:inline-block;"
         :show-file-list="false"
@@ -13,13 +12,11 @@
         <i v-else class="el-icon-plus avatar-uploader-icon" />
       </el-upload>
       {{ form.userName }}
-      <!-- </el-form> -->
       <div>
         <el-button @click="handlegoBack">返回</el-button>
       </div>
     </el-card>
 
-    <!-- <el-button @click="getImgSrc">sads</el-button> -->
   </div>
 
 </template>
@@ -78,7 +75,6 @@ export default {
       })
       if (res.objects) {
         this.imageUrl = this.client.signatureUrl(res.objects[res.objects.length - 1].name)
-        console.log(this.imageUrl)
       }
     },
     handlegoBack() {
@@ -89,3 +85,28 @@ export default {
   }
 }
 </script>
+<style>
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>
