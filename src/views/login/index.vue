@@ -2,7 +2,7 @@
   <div class="container">
     <el-card>
       <el-form label-width="80px">
-        <el-form-item label="用户名">
+        <el-form-item label="yc">
           <el-input v-model="form.userName" :maxlength="50" clearable />
         </el-form-item>
 
